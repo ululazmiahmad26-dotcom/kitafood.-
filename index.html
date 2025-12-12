@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Food Store</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f4; }
+        header { background-color: #ff5722; color: white; padding: 20px; text-align: center; }
+        .container { max-width: 1200px; margin: 20px auto; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        .products { display: flex; flex-wrap: wrap; gap: 20px; }
+        .product { border: 1px solid #ddd; padding: 15px; width: 300px; text-align: center; border-radius: 8px; }
+        .product img { width: 100%; height: 200px; object-fit: cover; border-radius: 8px; }
+        button { background-color: #ff5722; color: white; border: none; padding: 10px; cursor: pointer; border-radius: 5px; }
+        button:hover { background-color: #e64a19; }
+        #cart { margin-top: 20px; }
+        #cart-items { list-style: none; padding: 0; }
+        #cart-items li { padding: 10px; border-bottom: 1px solid #ddd; }
+        #checkout { display: none; margin-top: 20px; }
+        form { display: flex; flex-direction: column; gap: 10px; }
+        input, select { padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>kita food</h1>
+        <p>makan biar kenyang</p>
+    </header>
+    <div class="container">
+        <h2>Produk Kami</h2>
+        <div class="products" id="products">
+            <!-- Produk akan ditambahkan secara dinamis oleh JS -->
+        </div>
+        
+        <div id="cart">
+            <h2>Keranjang Belanja</h2>
+            <ul id="cart-items"></ul>
+            <p>Total: Rp <span id="total">0</span></p>
+            <button onclick="showCheckout()">Checkout</button>
+        </div>
+        
+        <div id="checkout">
+            <h2>Checkout</h2>
+            <form id="checkout-form">
+                <input type="text" placeholder="Nama Lengkap" required>
+                <input type="text" placeholder="Alamat Pengiriman" required>
+                <input type="tel" placeholder="Nomor Telepon" required>
+                <select required>
+                    <option value="">Pilih Metode Pembayaran</option>
+                    <option value="cod">Bayar di Tempat (COD)</option>
+                    <option value="transfer">Transfer Bank</option>
+                </select>
+                <button type="submit">Pesan Sekarang</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Data produk (bisa diperluas)
+        const products = [
+            { id: 1, name: 'Pizza Margherita', price: 500000000, image: 'https://uploads.onecompiler.io/447bc25w7/447bb63uy/20220211142347-margherita-9920_ba86be55-674e-4f35-8094-2067ab41a671.jpg' },
+            { id: 2, name: 'Burger Cheese', price: 3000000000, image: 'https://uploads.onecompiler.io/447bc25w7/447bb63uy/images.jpeg' },
+            { id: 3, name: 'Nasi Goreng', price: 250000000, image: 'https://uploads.onecompiler.io/447bc25w7/447bb63uy/images%20(1).jpeg' },
+            { id: 4, name: 'Ayam Bakar', price: 4000000000, image: 'https://uploads.onecompiler.io/447bc25w7/447bb63uy/images%20(2).jpeg' }
+        ];
+
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+        // Render produk
+        const productsContainer = document.getElementById('products');
+        products.forEach(product => {
+            const productDiv = document.createElement('div');
+            productDiv.className = 'product';
+            productDiv.innerHTML = `
+                <img src="${product.image}" alt="${product.name}">
+                <h3>${product.name}</h3>
+                <p>Rp ${product.price.toLocaleString()}</p>
+                <button onclick="addToCart(${product.id})">Add to Cart</button>
+            `;
+            productsContainer.appendChild(productDiv);
+        });
+
+        // Tambah ke keranjang
+        function addToCart(id) {
+            const product = products.find(p => p.id === id);
+            const existing = cart.find(item => item.id === id);
+            if (existing) {
+                existing.quantity++;
+            } else {
+                cart.push({ ...product, quantity: 1 });
+            }
+            updateCart();
+        }
+
+        // Update keranjang
+        function updateCart() {
+            const cartItems = document.getElementById('cart-items');
+            cartItems.innerHTML = '';
+            let total = 0;
+            cart.forEach(item => {
+                const li = document.createElement('li');
+                li.textContent = `${item.name} x${item.quantity} - Rp ${(item.price * item.quantity).toLocaleString()}`;
+                cartItems.appendChild(li);
+                total += item.price * item.quantity;
+            });
+            document.getElementById('total').textContent = total.toLocaleString();
+            localStorage.setItem('cart', JSON.stringify(cart));
+        }
+
+        // Tampilkan checkout
+        function showCheckout() {
+            if (cart.length === 0) {
+                alert('Keranjang kosong!');
+                return;
+            }
+            document.getElementById('checkout').style.display = 'block';
+        }
+
+        // Handle form checkout (simulasi)
+        document.getElementById('checkout-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Pesanan berhasil! (Ini simulasi. Dalam aplikasi nyata, hubungkan ke backend.)');
+            cart = [];
+            updateCart();
+            document.getElementById('checkout').style.display = 'none';
+        });
+
+        // Load cart saat halaman dimuat
+        updateCart();
+    </script>
+</body>
+</html>
